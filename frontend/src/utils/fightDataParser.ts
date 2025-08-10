@@ -1,7 +1,19 @@
+import { 
+  FightData, 
+  Fighter, 
+  FightLogEntry, 
+  CombatLevels, 
+  KoChances, 
+  FormattedMetrics,
+  FightDataParserInterface 
+} from '../types/index';
+
 // PvP Performance Tracker - Fight Data Parser
 // Based on the Java plugin's serialization patterns
 
-export class FightDataParser {
+export class FightDataParser implements FightDataParserInterface {
+  private numberFormat: Intl.NumberFormat;
+
   constructor() {
     this.numberFormat = new Intl.NumberFormat('en-US', {
       maximumFractionDigits: 0,
@@ -10,7 +22,7 @@ export class FightDataParser {
   }
 
   // Parse the main fight data structure
-  parseFightData(jsonData) {
+  parseFightData(jsonData: string | object): FightData {
     try {
       const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
       
@@ -30,12 +42,12 @@ export class FightDataParser {
       };
     } catch (error) {
       console.error('Error parsing fight data:', error);
-      throw new Error('Failed to parse fight data: ' + error.message);
+      throw new Error('Failed to parse fight data: ' + (error as Error).message);
     }
   }
 
   // Parse fighter data based on the Java @SerializedName patterns
-  parseFighter(fighterData) {
+  parseFighter(fighterData: any): Fighter {
     return {
       name: fighterData.n || 'Unknown',
       attackCount: fighterData.a || 0,
@@ -56,12 +68,12 @@ export class FightDataParser {
   }
 
   // Parse fight log entries
-  parseFightLogEntries(entries) {
+  parseFightLogEntries(entries: any[]): FightLogEntry[] {
     return entries.map(entry => this.parseFightLogEntry(entry));
   }
 
   // Parse individual fight log entry
-  parseFightLogEntry(entry) {
+  parseFightLogEntry(entry: any): FightLogEntry {
     return {
       time: entry.t || 0,
       tick: entry.T || 0,
@@ -93,7 +105,7 @@ export class FightDataParser {
   }
 
   // Parse combat levels
-  parseCombatLevels(levelsData) {
+  parseCombatLevels(levelsData: any): CombatLevels | null {
     if (!levelsData) return null;
     
     return {
@@ -107,7 +119,7 @@ export class FightDataParser {
   }
 
   // Calculate metrics for display
-  calculateMetrics(fighter) {
+  calculateMetrics(fighter: Fighter): any {
     const offPrayPercentage = fighter.attackCount > 0 
       ? (fighter.offPraySuccessCount / fighter.attackCount * 100).toFixed(1)
       : '0.0';
@@ -144,7 +156,7 @@ export class FightDataParser {
   }
 
   // Calculate KO chances based on fight log entries
-  calculateKoChances(fightLogEntries) {
+  calculateKoChances(fightLogEntries: FightLogEntry[]): KoChances {
     if (!fightLogEntries || fightLogEntries.length === 0) {
       return { count: 0, overallProbability: 0 };
     }
@@ -167,8 +179,13 @@ export class FightDataParser {
     };
   }
 
+  // Public method to format numbers
+  formatNumber(value: number): string {
+    return this.numberFormat.format(value)
+  }
+
   // Format the metrics for display (matching the plugin output)
-  formatMetrics(fighter, isCompetitor = true, opponent = null) {
+  formatMetrics(fighter: Fighter, isCompetitor: boolean = true, opponent: Fighter | null = null): FormattedMetrics {
     const metrics = this.calculateMetrics(fighter);
     
     // Calculate robe hits correctly if we have opponent data

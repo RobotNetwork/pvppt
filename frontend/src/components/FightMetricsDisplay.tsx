@@ -1,11 +1,18 @@
 import './FightMetricsDisplay.css'
+import { FightData } from '../types/index'
+import { FightDataParser } from '../utils/fightDataParser'
 
-const FightMetricsDisplay = ({ fightData, parser, winner }) => {
+interface FightMetricsDisplayProps {
+  fightData: FightData;
+  parser: FightDataParser;
+  winner: string | null;
+}
+
+const FightMetricsDisplay: React.FC<FightMetricsDisplayProps> = ({ fightData, parser, winner }) => {
 	const competitorMetrics = parser.formatMetrics(fightData.competitor, true, fightData.opponent)
 	const opponentMetrics = parser.formatMetrics(fightData.opponent, false, fightData.competitor)
 
-	// Calculate differences for visual indicators - only show on the better side
-	const getAttackDifference = () => {
+	const getAttackDifference = (): string | null => {
 		const compAttacks = fightData.competitor.attackCount
 		const oppAttacks = fightData.opponent.attackCount
 		let diff = 0
@@ -17,7 +24,7 @@ const FightMetricsDisplay = ({ fightData, parser, winner }) => {
 		return diff !== 0 ? (diff > 0 ? `+${diff}` : `${diff}`) : null
 	}
 
-	const getDamageDifference = () => {
+	const getDamageDifference = (): string | null => {
 		const compDamage = fightData.competitor.damageDealt
 		const oppDamage = fightData.opponent.damageDealt
 		let diff = 0
@@ -29,7 +36,7 @@ const FightMetricsDisplay = ({ fightData, parser, winner }) => {
 		return diff !== 0 ? (diff > 0 ? `+${diff}` : `${diff}`) : null
 	}
 
-	const getDeservedDamageDifference = () => {
+	const getDeservedDamageDifference = (): string | null => {
 		const compDeserved = fightData.competitor.deservedDamage
 		const oppDeserved = fightData.opponent.deservedDamage
 		let diff = 0
@@ -38,10 +45,10 @@ const FightMetricsDisplay = ({ fightData, parser, winner }) => {
 		} else {
 			diff = oppDeserved - compDeserved
 		}
-		return diff !== 0 ? (diff > 0 ? `+${parser.numberFormat.format(diff)}` : `${parser.numberFormat.format(diff)}`) : null
+		return diff !== 0 ? (diff > 0 ? `+${parser.formatNumber(diff)}` : `${parser.formatNumber(diff)}`) : null
 	}
 
-	const getKoChancesDifference = () => {
+	const getKoChancesDifference = (): string | null => {
 		const compKoChances = competitorMetrics.koChances.count
 		const oppKoChances = opponentMetrics.koChances.count
 		let diff = 0
@@ -53,7 +60,7 @@ const FightMetricsDisplay = ({ fightData, parser, winner }) => {
 		return diff !== 0 ? (diff > 0 ? `+${diff}` : `${diff}`) : null
 	}
 
-	const parsePercentage = (percentage) => {
+	const parsePercentage = (percentage: string): number => {
 		// Extract the percentage number from strings like "28/55 (50.9%)" or "3/28 (10.7%)"
 		const match = percentage.match(/\(([\d.]+)%\)/)
 		return match ? parseFloat(match[1]) : 0

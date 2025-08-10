@@ -1,218 +1,146 @@
-# PvP Performance Tracker Web App
+# PvP Performance Tracker Frontend
 
-A React-based web application that mimics the functionality of the RuneLite PvP Performance Tracker plugin. Users can paste their fight data JSON and view detailed performance metrics with fight history persistence.
+A modern React TypeScript application for analyzing PvP fight data from Old School RuneScape.
 
-## Features
+## 🚀 Features
 
-- **Fight Data Parsing**: Parse JSON fight data exported from the RuneLite plugin
-- **Performance Metrics**: Display comprehensive fight statistics including:
-  - Off-prayer hit success rates with visual difference indicators
-  - Deserved damage calculations
-  - Magic hit luck percentages
-  - Offensive prayer success rates
-  - HP healed during fights
-  - Robe hit statistics
-  - Ghost barrage tracking
-- **Fight History**: Persistent storage of past fights with easy navigation
-- **Winner Display**: Prominent winner announcement for each fight
-- **Visual Comparisons**: Side-by-side metrics with difference indicators
-- **Responsive Design**: Modern, mobile-friendly interface
-- **Local Storage**: Fights are automatically saved to browser storage
+- **Fight Data Analysis**: Paste fight data JSON and get detailed metrics
+- **Performance Metrics**: Off-prayer hits, deserved damage, magic accuracy, and more
+- **Fight History**: Save and review past fights with duplicate detection
+- **Real-time Processing**: Auto-analyze pasted data with visual feedback
+- **Responsive Design**: Modern UI that works on desktop and mobile
 
-## Getting Started
+## 🛠️ Tech Stack
+
+- **React 19** - Latest React with concurrent features
+- **TypeScript 5.9** - Full type safety and modern JavaScript features
+- **Vite 7** - Fast build tool and dev server
+- **CSS Modules** - Scoped styling for components
+
+## 📁 Project Structure
+
+```
+src/
+├── components/           # React components
+│   ├── FightDataInput.tsx      # Data input with auto-analysis
+│   ├── FightMetricsDisplay.tsx # Metrics visualization
+│   └── FightHistory.tsx        # Fight history management
+├── types/               # TypeScript interfaces
+│   └── index.ts         # All data model definitions
+├── utils/               # Utility functions
+│   └── fightDataParser.ts # Fight data parsing logic
+├── App.tsx              # Main application component
+└── main.tsx             # Application entry point
+```
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js 18+ 
 - npm or yarn
 
 ### Installation
 
-1. Clone the repository
-2. Navigate to the project directory:
-   ```bash
-   cd pvptracker
-   ```
+```bash
+# Install dependencies
+npm install
 
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
+# Start development server
+npm run dev
 
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+# Build for production
+npm run build
 
-5. Open your browser and navigate to `http://localhost:5173`
+# Type checking
+npm run type-check
 
-## Usage
-
-1. **Paste Fight Data**: Copy your fight data JSON from the RuneLite plugin and paste it into the text area
-2. **Analyze**: Click "Analyze Fight Data" to process and display the metrics
-3. **View Results**: The application will display detailed statistics for both the competitor and opponent
-4. **Browse History**: Click on any fight in the history panel to view its metrics
-5. **Manage History**: Use the "Clear All" button to remove all saved fights
-
-## UI Features
-
-### Collapsible Input
-- The JSON input area is collapsed by default to save space
-- Click "Show JSON" to expand and view/edit the raw data
-- Shows character count when data is loaded
-
-### Winner Banner
-- Displays the winner prominently at the top of the analysis
-- Only shows when there's a clear winner (one player died)
-
-### Visual Difference Indicators
-- Green badges show when a player has better stats
-- Red badges show when a player has worse stats (e.g., robe hits)
-- Only the "better" stat shows the difference indicator
-
-### Fight History
-- Automatically saves each analyzed fight
-- Shows fighter names, timestamp, and winner
-- Displays quick stats (damage dealt, attack counts)
-- Click any fight to view its full analysis
-- Maintains last 50 fights in storage
-
-## Fight Data Format
-
-The application expects JSON data in the format exported by the RuneLite PvP Performance Tracker plugin:
-
-```json
-{
-  "c": {
-    "n": "PlayerName",
-    "a": 68,
-    "s": 42,
-    "d": 491.901,
-    "h": 603,
-    "z": 21,
-    "m": 13,
-    "M": 9.460,
-    "p": 65,
-    "g": 0,
-    "y": 0.000,
-    "H": 398,
-    "rh": 3,
-    "x": false,
-    "l": [...]
-  },
-  "o": {
-    "n": "OpponentName",
-    "a": 55,
-    "s": 35,
-    "d": 383.7,
-    "h": 466,
-    "z": 27,
-    "m": 11,
-    "M": 12.4,
-    "p": 0,
-    "g": 0,
-    "y": 0.000,
-    "H": 0,
-    "rh": 8,
-    "x": false,
-    "l": [...]
-  },
-  "t": 1753392860333,
-  "l": "UNKNOWN",
-  "w": 0
-}
+# Linting
+npm run lint
 ```
 
-## Metrics Explained
+### Development
 
-### Off-prayer Hits
-- **Format**: `successful_hits/total_hits (percentage%)`
-- **Description**: Hits landed when using a different combat style than the opponent's overhead prayer
-- **Difference**: Shows `+X%` when one player has better off-prayer success
+The development server will start at `http://localhost:5173` with hot reload enabled.
 
-### Deserved Damage
-- **Format**: `damage_value`
-- **Description**: Theoretical damage based on gear, levels, and opponent's prayer usage
-- **Difference**: Shows `+X` when one player deserved more damage
+## 🔧 Development Scripts
 
-### Magic Hits
-- **Format**: `actual_hits/total_magic_attacks (luck_percentage%)`
-- **Description**: Magic attack success rate with luck percentage (100% = expected, >100% = lucky, <100% = unlucky)
-- **Difference**: Shows `+X%` when one player had better magic luck
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run type-check` - Run TypeScript compiler check
+- `npm run lint` - Run ESLint
 
-### Offensive Prayers
-- **Format**: `successful_prayers/total_attacks (percentage%)`
-- **Description**: Percentage of attacks where the correct offensive prayer was used
+## 📊 Data Models
 
-### Robe Hits
-- **Format**: `hits_on_robes/melee_range_attacks (percentage%)`
-- **Description**: Hits taken while wearing robe top and bottom during melee/range attacks
-- **Difference**: Shows `-X%` when one player took fewer robe hits (better)
+The application uses comprehensive TypeScript interfaces for all PvP data:
 
-### Ghost Barrages
-- **Format**: `count G.B. (deserved_damage)`
-- **Description**: Number of ghost barrages and their deserved damage
+- **Fighter**: Player stats, combat levels, and fight performance
+- **FightData**: Complete fight information with competitor and opponent
+- **FightLogEntry**: Individual attack/hit data with gear and prayer info
+- **FormattedMetrics**: Calculated and formatted display metrics
 
-## Technical Details
+## 🎯 Key Features
 
-### Architecture
-- **Frontend**: React with Vite
-- **Styling**: CSS with responsive design
-- **Data Parsing**: Custom parser based on Java plugin serialization patterns
-- **Storage**: Browser localStorage for fight history
+### Auto-Analysis
+- Automatically processes pasted fight data
+- Visual feedback during processing
+- Duplicate fight detection
 
-### Key Components
-- `FightDataParser`: Handles JSON parsing and metric calculations
-- `FightDataInput`: User interface for data input with collapsible textarea
-- `FightMetricsDisplay`: Displays parsed metrics with difference indicators
-- `FightHistory`: Manages and displays saved fights
+### Performance Metrics
+- **Off-prayer hits**: Success rate without protection prayers
+- **Deserved damage**: Theoretical damage based on gear and levels
+- **Magic accuracy**: Hit rate vs. expected hit rate
+- **KO chances**: Probability calculations for kill opportunities
+- **Robe hits**: Special melee/range hits on magic users
 
-### Data Structure
-The parser extracts data using the same serialization patterns as the Java plugin:
-- Single-letter field names for compact storage
-- Nested fight log entries with detailed attack information
-- Combat levels and equipment data
+### Data Persistence
+- Local storage for fight history
+- Input field persistence
+- Automatic cleanup of old data
 
-## Project Structure
-```
-pvptracker/
-├── src/
-│   ├── components/
-│   │   ├── FightDataInput.jsx
-│   │   ├── FightDataInput.css
-│   │   ├── FightMetricsDisplay.jsx
-│   │   ├── FightMetricsDisplay.css
-│   │   ├── FightHistory.jsx
-│   │   └── FightHistory.css
-│   ├── utils/
-│   │   └── fightDataParser.js
-│   ├── App.jsx
-│   ├── App.css
-│   └── main.jsx
-├── public/
-│   └── fightdataexample.json
-└── package.json
+## 🔄 Data Flow
+
+1. **Input**: User pastes fight data JSON
+2. **Parsing**: `FightDataParser` converts raw data to typed objects
+3. **Analysis**: Metrics are calculated and formatted
+4. **Display**: Components render the analyzed data
+5. **Storage**: Fight data is saved to local storage
+
+## 🧪 Testing
+
+The application includes comprehensive TypeScript types that serve as runtime contracts. To add tests:
+
+```bash
+# Install testing dependencies
+npm install --save-dev vitest @testing-library/react
+
+# Add test script to package.json
+"test": "vitest"
 ```
 
-### Available Scripts
-- `npm run dev`: Start development server
-- `npm run build`: Build for production
-- `npm run preview`: Preview production build
+## 🚀 Deployment
 
-## Contributing
+The application builds to a static `dist/` folder that can be deployed to any static hosting service:
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with example data
-5. Submit a pull request
+- Netlify
+- Vercel
+- GitHub Pages
+- AWS S3 + CloudFront
 
-## License
+## 📝 Contributing
 
-This project is based on the RuneLite PvP Performance Tracker plugin and follows similar licensing terms.
+1. Ensure TypeScript compilation passes: `npm run type-check`
+2. Follow the existing code style and patterns
+3. Add proper type annotations for all new code
+4. Test your changes thoroughly
 
-## Acknowledgments
+## 🔗 Related Projects
 
-- Original RuneLite plugin by Matsyir
-- React and Vite for the development framework
-- RuneLite community for the plugin ecosystem
+- **Backend**: TypeScript calculation engine and metrics system
+- **Java Plugin**: RuneLite plugin for data collection
+- **Documentation**: Comprehensive architecture and API docs
+
+## 📄 License
+
+This project is part of the PvP Performance Tracker ecosystem.

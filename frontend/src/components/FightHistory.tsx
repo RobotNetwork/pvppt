@@ -1,6 +1,25 @@
 import './FightHistory.css'
+import { FightData, FightHistoryItem } from '../types/index'
 
-const FightHistory = ({ fights, selectedFight, onFightSelect, onClearHistory, onDeleteFight, getWinner, duplicateFightId }) => {
+interface FightHistoryProps {
+  fights: FightHistoryItem[];
+  selectedFight: FightHistoryItem | null;
+  onFightSelect: (fight: FightHistoryItem) => void;
+  onClearHistory: () => void;
+  onDeleteFight: (fightId: number) => void;
+  getWinner: (fight: FightData) => string | null;
+  duplicateFightId: number | null;
+}
+
+const FightHistory: React.FC<FightHistoryProps> = ({ 
+  fights, 
+  selectedFight, 
+  onFightSelect, 
+  onClearHistory, 
+  onDeleteFight, 
+  getWinner, 
+  duplicateFightId 
+}) => {
   if (fights.length === 0) {
     return (
       <div className="fight-history">
