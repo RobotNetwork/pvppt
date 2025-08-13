@@ -47,13 +47,41 @@ body {
   gap: 1.25rem;
 }
 
+.config-section {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.config-toggle {
+  position: absolute;
+  top: 8px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: 1px solid #2a2f37;
+  background: #12161c;
+  color: #c7cbd1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  z-index: 2;
+}
+
+.config-toggle:hover {
+  border-color: #c9a227;
+  color: #e4e0cf;
+}
+
 .app-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
+  min-width: 0;
 }
 
 .input-section {
@@ -66,9 +94,20 @@ body {
   width: 100%;
 }
 
-.history-section {
+.sidebar {
   width: 350px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.history-section {
+  width: 100%;
+}
+
+.analysis-section {
+  width: 100%;
 }
 
 /* Button Styles */
@@ -138,7 +177,13 @@ body {
     max-width: 100%;
   }
   
-  .history-section {
+  .sidebar {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .analysis-section {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;

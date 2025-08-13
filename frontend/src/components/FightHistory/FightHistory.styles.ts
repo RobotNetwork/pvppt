@@ -1,13 +1,13 @@
 export const fightHistoryStyles = `
-  .fight-history { background: #0f1216; border-radius: 12px; padding: .9rem; box-shadow: 0 6px 18px rgba(0,0,0,.35); height: fit-content; max-height: 80vh; overflow-y: auto; overflow-x: hidden; border: 1px solid #2a2f37; }
-  .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .6rem; padding-bottom: .3rem; border-bottom: 1px solid #2a2f37; }
+  .fight-history { background: #0f1216; border-radius: 12px; padding: .9rem; box-shadow: 0 6px 18px rgba(0,0,0,.35); height: fit-content; max-height: 40vh; overflow-y: auto; overflow-x: hidden; border: 1px solid #2a2f37; }
+  .history-header { position: sticky; top: 0; z-index: 10; background: #0f1216; display: flex; justify-content: space-between; align-items: center; padding-bottom: .3rem; padding-top: .1rem; border-bottom: 1px solid #2a2f37; box-shadow: 0 6px 12px rgba(0,0,0,.35); }
   .history-header h3 { margin: 0; color: #e4e0cf; font-size: 1rem; font-weight: 800; }
   .filters { display:flex; gap:.35rem; align-items:center; }
   .filter-btn { background:#12161c; color:#c7cbd1; border:1px solid #2a2f37; padding:.25rem .5rem; border-radius:6px; font-size:.8rem; cursor:pointer; }
   .filter-btn.active { background:#1a212b; color:#e4e0cf; border-color:#c9a227; box-shadow:0 0 0 2px rgba(201,162,39,.15); }
   .clear-history-btn { background: none; border: 1px solid #2a2f37; color:#c7cbd1; border-radius:6px; font-size: .95rem; cursor: pointer; padding: .25rem .45rem; }
   .clear-history-btn:hover { background:#1a212b; }
-  .history-list { display:flex; flex-direction:column; gap:.5rem; }
+  .history-list { display:flex; flex-direction:column; gap:.5rem; margin-top:.6rem; }
   .history-item { background:#0c0f13; border:1px solid #2a2f37; border-radius:8px; padding:.6rem .75rem; margin-bottom:.1rem; cursor:pointer; transition:all .15s ease; position:relative; }
   .history-item:hover { border-color:#c9a227; box-shadow:0 0 0 2px rgba(201,162,39,.15); }
   .history-item.selected { border-color:#6a8dff; box-shadow: 0 0 0 2px rgba(106,141,255,.18); background:#0e1320; }
@@ -22,5 +22,3 @@ export const fightHistoryStyles = `
   .damage-dealt { color:#e6b35c; }
   .attack-count { color:#7aa2ff; }
 `;
-
-

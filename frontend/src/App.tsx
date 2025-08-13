@@ -5,6 +5,7 @@ import FightMetricsDisplay from './components/FightMetricsDisplay'
 import FightHistory from './components/FightHistory'
 import ConfigurationPanel from './components/ConfigurationPanel'
 import Header from './components/Header'
+import AdvancedAnalysis, { computeSpikeSeries, SpikeGraph } from './components/AdvancedAnalysis'
 import { FightDataParser } from './utils/fightDataParser'
 import { getConfigService } from './utils/configService'
 import { createCalculationEngine } from './utils/calculationEngine'
@@ -16,6 +17,11 @@ function App() {
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [config, setConfig] = useState<PvpTrackerConfig>(() => getConfigService().getConfig())
 	const [calculationMode, setCalculationMode] = useState<CalculationMode>(CalculationMode.DEFAULT)
+	const [isConfigOpen, setIsConfigOpen] = useState<boolean>(() => {
+		const saved = localStorage.getItem('pvpConfigPanelOpen')
+		return saved === null ? true : saved === 'true'
+	})
+
 	const [fightHistory, setFightHistory] = useState<FightHistoryItem[]>(() => {
 		const saved = localStorage.getItem('pvpFightHistory')
 		if (saved) {
@@ -38,6 +44,7 @@ function App() {
 	})
 	const [selectedFight, setSelectedFight] = useState<FightHistoryItem | null>(null)
 	const [duplicateFightId, setDuplicateFightId] = useState<number | null>(null)
+	const [showSpike, setShowSpike] = useState<boolean>(false)
 
 	const parser = new FightDataParser()
 	const configService = getConfigService()
@@ -47,6 +54,11 @@ function App() {
 	useEffect(() => {
 		setConfig(configService.getConfig())
 	}, [])
+
+	// Persist configuration panel open/closed state
+	useEffect(() => {
+		localStorage.setItem('pvpConfigPanelOpen', String(isConfigOpen))
+	}, [isConfigOpen])
 
 	const hashFightData = (jsonData: object): string => {
 		// djb2 algorithm
@@ -174,13 +186,21 @@ function App() {
 		<div className="app">
 			<Header />
 			<main className="app-main">
-				<div className="config-section" style={{width: 280}}>
+				<div className="config-section" style={{ width: isConfigOpen ? 280 : 16, transition: 'width 200ms ease' }}>
 					<ConfigurationPanel
 						config={config}
 						onConfigChange={handleConfigChange}
 						calculationMode={calculationMode}
 						onCalculationModeChange={handleCalculationModeChange}
+						hidden={!isConfigOpen}
 					/>
+					<button
+						className="config-toggle"
+						onClick={() => setIsConfigOpen(prev => !prev)}
+						aria-label={isConfigOpen ? 'Collapse configuration panel' : 'Expand configuration panel'}
+					>
+						{isConfigOpen ? '‹' : '›'}
+					</button>
 				</div>
 
 				<div className="app-content">
@@ -194,17 +214,32 @@ function App() {
 
 					<div className="display-section">
 						{fightData && (
-							<FightMetricsDisplay
-								fightData={fightData}
-								parser={parser}
-								winner={getWinner(fightData)}
-							/>
+							<>
+								<FightMetricsDisplay
+									fightData={fightData}
+									parser={parser}
+									winner={getWinner(fightData)}
+								/>
+								{/* Charts stacked below analysis when enabled */}
+								{showSpike && (() => {
+									const series = computeSpikeSeries(fightData)
+									if (!series || series.ticks.length === 0) return (
+										<div className="analysis-section"><div className="empty-state">No tick data available.</div></div>
+									)
+									return (
+										<div className="analysis-section">
+											<SpikeGraph series={series} competitorName={fightData.competitor.name} opponentName={fightData.opponent.name} />
+										</div>
+									)
+								})()}
+							</>
 						)}
 					</div>
 				</div>
 
-				<div className="history-section">
-					<FightHistory
+				<div className="sidebar">
+					<div className="history-section">
+						<FightHistory
 						fights={fightHistory.slice(0, 200)}
 						selectedFight={selectedFight}
 						onFightSelect={handleFightSelect}
@@ -212,7 +247,11 @@ function App() {
 						onDeleteFight={handleDeleteFight}
 						getWinner={getWinner}
 						duplicateFightId={duplicateFightId}
-					/>
+						/>
+					</div>
+						<div className="analysis-section">
+							<AdvancedAnalysis fightData={fightData} showSpike={showSpike} onShowSpikeChange={setShowSpike} />
+						</div>
 				</div>
 			</main>
 		</div>

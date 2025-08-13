@@ -11,7 +11,7 @@ export const fightDataInputStyles = `
 	.fight-data-textarea.pasted { border-color:#356337; box-shadow:0 0 0 2px rgba(53,99,55,.2); }
 	.textarea-overlay { position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; display:flex; align-items:center; justify-content:center; background:rgba(8,10,13,0.35); border-radius:8px; transition:opacity .15s ease; }
 	.fight-data-textarea:focus + .textarea-overlay, .fight-data-textarea.pasted + .textarea-overlay { opacity:0; }
-	.paste-instructions { display:flex; flex-direction:column; align-items:center; gap:.5rem; color:#7f8793; font-size:.9rem; }
+	.paste-instructions { display:flex; flex-direction:column; align-items:center; gap:.5rem; color:#7f8793; font-size:.9rem;  padding:1rem;}
 	.paste-icon { font-size:1.35rem; opacity:.8; }
 `;
 

@@ -126,7 +126,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
       </div>
 
       <div className="config-item">
-        <label>ACB/DCB/DHCB Ammo:</label>
+        <label>ACB/DCB Ammo:</label>
         <select
           value={localConfig.strongBoltChoice}
           onChange={(e) => handleConfigChange('strongBoltChoice', e.target.value as StrongBoltAmmo)}
@@ -142,7 +142,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
         </p>
       </div>
 
-      <div className="config-item">
+      {/* <div className="config-item">
         <label>Blowpipe Ammo:</label>
         <select
           value={localConfig.bpDartChoice}
@@ -157,7 +157,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
         <p className="config-description">
           Darts used for blowpipe deserved damage calculation.
         </p>
-      </div>
+      </div> */}
     </div>
   );
 
@@ -295,7 +295,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
   return (
     <div className="configuration-panel" style={{opacity: hidden ? 0 : 1, pointerEvents: hidden ? 'none' : 'auto'}}>
       <style>{configurationPanelStyles}</style>
-      <h2>PvP Performance Tracker Configuration</h2>
+      <h2>Settings (optional)</h2>
       
       <div className="config-navigation">
         <button

@@ -53,7 +53,7 @@ const FightDataInput: React.FC<FightDataInputProps> = ({ onSubmit, onClear, isLo
 		if (showPasted) {
 			const timer = setTimeout(() => {
 				setShowPasted(false)
-			}, 2500)
+			}, 4500)
 
 			return () => clearTimeout(timer)
 		}
@@ -71,9 +71,7 @@ const FightDataInput: React.FC<FightDataInputProps> = ({ onSubmit, onClear, isLo
 	return (
 		<div className="fight-data-input">
 			<style>{fightDataInputStyles}</style>
-			<div className="input-header">
-				<h2>Paste Fight Data</h2>
-			</div>
+
 
 			{error && (
 				<div className="error-message">
@@ -102,7 +100,9 @@ const FightDataInput: React.FC<FightDataInputProps> = ({ onSubmit, onClear, isLo
 				<div className="textarea-overlay">
 					<div className="paste-instructions">
 						<span className="paste-icon">📋</span>
-						<span>Paste fight data here</span>
+						<div className="input-header">
+				<h2>Paste Fight Data</h2>
+			</div>
 					</div>
 				</div>
 			</div>
@@ -111,5 +111,3 @@ const FightDataInput: React.FC<FightDataInputProps> = ({ onSubmit, onClear, isLo
 }
 
 export default FightDataInput
-
-

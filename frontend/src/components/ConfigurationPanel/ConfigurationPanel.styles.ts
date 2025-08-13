@@ -13,5 +13,3 @@ export const configurationPanelStyles = `
   .config-item input[type="number"], .config-item select { background:#12161c; color:#c7cbd1; border:1px solid #2a2f37; border-radius:6px; padding:6px 8px; font-size:.85rem; min-width: 110px; }
   .config-description { color:#9aa2ad; font-size:.8rem; margin:0; margin-top:6px; font-style: italic; }
 `;
-
-

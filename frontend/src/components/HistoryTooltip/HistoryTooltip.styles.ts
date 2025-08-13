@@ -1,7 +1,7 @@
 export const historyTooltipStyles = `
 	.history-tooltip {
 		position: absolute;
-		top: var(--tooltip-top, 0px);
+		top: var(--tooltip-top - 10, 0px);
 		right: 0;
 		z-index: 50;
 		background: #0f1216;
@@ -9,9 +9,7 @@ export const historyTooltipStyles = `
 		border-radius: 8px;
 		box-shadow: 0 8px 24px rgba(0,0,0,.5);
 		padding: .6rem .7rem;
-		width: 360px;
 		max-width: 100%;
-		
 		overflow: auto;
 		pointer-events: none;
 		box-sizing: border-box;
