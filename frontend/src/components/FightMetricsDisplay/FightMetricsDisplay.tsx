@@ -1,12 +1,5 @@
-import './FightMetricsDisplay.css'
-import { FightData } from '../types/index'
-import { FightDataParser } from '../utils/fightDataParser'
-
-interface FightMetricsDisplayProps {
-  fightData: FightData;
-  parser: FightDataParser;
-  winner: string | null;
-}
+import type { FightMetricsDisplayProps } from './FightMetricsDisplay.types'
+import { fightMetricsDisplayStyles } from './FightMetricsDisplay.styles'
 
 const FightMetricsDisplay: React.FC<FightMetricsDisplayProps> = ({ fightData, parser, winner }) => {
 	const competitorMetrics = parser.formatMetrics(fightData.competitor, true, fightData.opponent)
@@ -68,6 +61,7 @@ const FightMetricsDisplay: React.FC<FightMetricsDisplayProps> = ({ fightData, pa
 
 	return (
 		<div className="fight-metrics-display">
+			<style>{fightMetricsDisplayStyles}</style>
 			<div className="fight-header">
 				<h2>Fight Analysis</h2>
 				<div className="fight-info">
@@ -111,7 +105,7 @@ const FightMetricsDisplay: React.FC<FightMetricsDisplayProps> = ({ fightData, pa
 						<div className="metric-row">
 							<span className="metric-label">Magic hits:</span>
 							<span className="metric-value">
-								{competitorMetrics.magicStats.split(" ")[0]} {/* example: "28/55 (50.9%)" -> "28/55" */}
+								{competitorMetrics.magicStats.split(" ")[0]}
 								{parsePercentage(competitorMetrics.magicStats) > parsePercentage(opponentMetrics.magicStats) && (
 									<span className="difference positive">{competitorMetrics.magicStats.split(" ")[1]}</span>
 								)}
@@ -189,7 +183,7 @@ const FightMetricsDisplay: React.FC<FightMetricsDisplayProps> = ({ fightData, pa
 						<div className="metric-row">
 							<span className="metric-label">Magic hits:</span>
 							<span className="metric-value">
-								{opponentMetrics.magicStats.split(" ")[0]} {/* example: "11/21 (103.9%)" -> "11/21" */}
+								{opponentMetrics.magicStats.split(" ")[0]}
 								{parsePercentage(opponentMetrics.magicStats) > parsePercentage(competitorMetrics.magicStats) && (
 									<span className="difference positive">{opponentMetrics.magicStats.split(" ")[1]}</span>
 								)}
@@ -240,3 +234,5 @@ const FightMetricsDisplay: React.FC<FightMetricsDisplayProps> = ({ fightData, pa
 }
 
 export default FightMetricsDisplay
+
+

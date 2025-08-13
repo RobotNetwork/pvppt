@@ -105,3 +105,135 @@ export interface FightDataParserInterface {
   calculateKoChances(fightLogEntries: FightLogEntry[]): KoChances;
   formatMetrics(fighter: Fighter, isCompetitor?: boolean, opponent?: Fighter | null): FormattedMetrics;
 }
+
+// ================================= Configuration System =================================
+
+export enum RobeHitFilter {
+  BOTTOM = "BOTTOM",
+  TOP = "TOP", 
+  BOTH = "BOTH",
+  EITHER = "EITHER"
+}
+
+export enum RingData {
+  SEERS_RING = "SEERS_RING",
+  ARCHERS_RING = "ARCHERS_RING",
+  BERSERKER_RING = "BERSERKER_RING",
+  RING_OF_SUFFERING = "RING_OF_SUFFERING",
+  SEERS_RING_I = "SEERS_RING_I",
+  ARCHERS_RING_I = "ARCHERS_RING_I",
+  BERSERKER_RING_I = "BERSERKER_RING_I",
+  RING_OF_SUFFERING_I = "RING_OF_SUFFERING_I",
+  BRIMSTONE_RING = "BRIMSTONE_RING",
+  MAGUS_RING = "MAGUS_RING",
+  VENATOR_RING = "VENATOR_RING",
+  BELLATOR_RING = "BELLATOR_RING",
+  ULTOR_RING = "ULTOR_RING",
+  RING_OF_SHADOWS = "RING_OF_SHADOWS",
+  NONE = "NONE"
+}
+
+export enum BoltAmmo {
+  RUNITE_BOLTS = "RUNITE_BOLTS",
+  DRAGONSTONE_BOLTS_E = "DRAGONSTONE_BOLTS_E",
+  DIAMOND_BOLTS_E = "DIAMOND_BOLTS_E"
+}
+
+export enum StrongBoltAmmo {
+  RUNITE_BOLTS = "RUNITE_BOLTS",
+  DRAGONSTONE_BOLTS_E = "DRAGONSTONE_BOLTS_E",
+  DIAMOND_BOLTS_E = "DIAMOND_BOLTS_E",
+  DRAGONSTONE_DRAGON_BOLTS_E = "DRAGONSTONE_DRAGON_BOLTS_E",
+  OPAL_DRAGON_BOLTS_E = "OPAL_DRAGON_BOLTS_E",
+  DIAMOND_DRAGON_BOLTS_E = "DIAMOND_DRAGON_BOLTS_E"
+}
+
+export enum DartAmmo {
+  ADAMANT_DARTS = "ADAMANT_DARTS",
+  RUNE_DARTS = "RUNE_DARTS",
+  DRAGON_DARTS = "DRAGON_DARTS"
+}
+
+export interface PvpTrackerConfig {
+  // General Settings
+  settingsConfigured: boolean;
+  restrictToLms: boolean;
+  showFightHistoryPanel: boolean;
+  robeHitFilter: RobeHitFilter;
+  
+  // Gear/Ammo Settings
+  ringChoice: RingData;
+  boltChoice: BoltAmmo;
+  strongBoltChoice: StrongBoltAmmo;
+  bpDartChoice: DartAmmo;
+  
+  // Level Settings
+  attackLevel: number;
+  strengthLevel: number;
+  defenceLevel: number;
+  rangedLevel: number;
+  magicLevel: number;
+  
+  // Misc Settings
+  dlongIsVls: boolean;
+  fightLogInChat: boolean;
+  showWorldInSummary: boolean;
+  nameFilter: string;
+}
+
+// ================================= Calculation Engine Interfaces =================================
+
+export enum CalculationMode {
+  DEFAULT = "DEFAULT",           // Use data from JSON payload
+  HISCORE_LOOKUP = "HISCORE_LOOKUP", // Use hiscore API to determine stats
+  SETTINGS = "SETTINGS"          // Use user-configured settings
+}
+
+export interface CalculationEngineConfig {
+  mode: CalculationMode;
+  useHiscoreLookup: boolean;
+  useCustomSettings: boolean;
+  fallbackToDefault: boolean;
+}
+
+export interface DeservedDamageCalculator {
+  calculateDeservedDamage(
+    attackData: any,
+    config: PvpTrackerConfig,
+    calculationMode: CalculationMode
+  ): number;
+}
+
+export interface MagicLuckCalculator {
+  calculateMagicLuck(
+    magicData: any,
+    config: PvpTrackerConfig,
+    calculationMode: CalculationMode
+  ): number;
+}
+
+export interface KoChanceCalculator {
+  calculateKoChance(
+    attackData: any,
+    opponentHp: number,
+    config: PvpTrackerConfig,
+    calculationMode: CalculationMode
+  ): number;
+}
+
+export interface HiscoreLookupService {
+  lookupPlayerStats(username: string): Promise<CombatLevels>;
+}
+
+export interface CalculationEngine {
+  deservedDamageCalculator: DeservedDamageCalculator;
+  magicLuckCalculator: MagicLuckCalculator;
+  koChanceCalculator: KoChanceCalculator;
+  hiscoreLookupService: HiscoreLookupService;
+  
+  recalculateMetrics(
+    fightData: FightData,
+    config: PvpTrackerConfig,
+    calculationMode: CalculationMode
+  ): Promise<FightData>;
+}

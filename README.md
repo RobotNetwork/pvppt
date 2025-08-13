@@ -130,9 +130,9 @@ The system supports extensive configuration through the `PluginConfiguration` in
 
 ```typescript
 interface PluginConfiguration {
-  // Overlay settings
-  showFightOverlay: boolean;
-  showOverlayNames: boolean;
+  // General settings
+  restrictToLms: boolean;
+  showFightHistoryPanel: boolean;
   
   // Gear & ammo settings
   ringChoice: RingData;
@@ -144,7 +144,6 @@ interface PluginConfiguration {
   
   // And many more...
 }
-```
 
 ## 📊 Metrics
 

@@ -3,13 +3,19 @@ import './App.css'
 import FightDataInput from './components/FightDataInput'
 import FightMetricsDisplay from './components/FightMetricsDisplay'
 import FightHistory from './components/FightHistory'
+import ConfigurationPanel from './components/ConfigurationPanel'
+import Header from './components/Header'
 import { FightDataParser } from './utils/fightDataParser'
-import { FightData, FightHistoryItem } from './types/index'
+import { getConfigService } from './utils/configService'
+import { createCalculationEngine } from './utils/calculationEngine'
+import { FightData, FightHistoryItem, PvpTrackerConfig, CalculationMode } from './types/index'
 
 function App() {
 	const [fightData, setFightData] = useState<FightData | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [config, setConfig] = useState<PvpTrackerConfig>(() => getConfigService().getConfig())
+	const [calculationMode, setCalculationMode] = useState<CalculationMode>(CalculationMode.DEFAULT)
 	const [fightHistory, setFightHistory] = useState<FightHistoryItem[]>(() => {
 		const saved = localStorage.getItem('pvpFightHistory')
 		if (saved) {
@@ -34,6 +40,13 @@ function App() {
 	const [duplicateFightId, setDuplicateFightId] = useState<number | null>(null)
 
 	const parser = new FightDataParser()
+	const configService = getConfigService()
+	const calculationEngine = createCalculationEngine()
+
+	// Load configuration on mount
+	useEffect(() => {
+		setConfig(configService.getConfig())
+	}, [])
 
 	const hashFightData = (jsonData: object): string => {
 		// djb2 algorithm
@@ -74,13 +87,28 @@ function App() {
 		try {
 			const parsedData = parser.parseFightData(jsonData)
 
+			// Recalculate metrics based on current calculation mode and config
+			let recalculatedData = parsedData
+			if (calculationMode !== CalculationMode.DEFAULT) {
+				try {
+					recalculatedData = await calculationEngine.recalculateMetrics(
+						parsedData,
+						config,
+						calculationMode
+					)
+				} catch (calcError) {
+					console.warn('Failed to recalculate metrics, using original data:', calcError)
+					// Continue with original data if recalculation fails
+				}
+			}
+
 			// Add to fight history
 			const newFight: FightHistoryItem = {
 				id: Date.now(),
 				timestamp: Date.now(),
-				data: parsedData,
-				competitorName: parsedData.competitor.name,
-				opponentName: parsedData.opponent.name,
+				data: recalculatedData,
+				competitorName: recalculatedData.competitor.name,
+				opponentName: recalculatedData.opponent.name,
 				hash: hashFightData(JSON.parse(jsonData)) // Add hash to the fight object
 			}
 
@@ -92,8 +120,8 @@ function App() {
 				setSelectedFight(duplicateFight)
 				setDuplicateFightId(duplicateFight.id)
 			} else {
-				setFightHistory(prev => [newFight, ...prev.slice(0, 49)]) // Keep last 50 fights
-				setFightData(parsedData)
+				setFightHistory(prev => [newFight, ...prev.slice(0, 9999)]) // Keep last 10000 fights
+				setFightData(recalculatedData)
 				setSelectedFight(newFight)
 			}
 		} catch (err) {
@@ -124,6 +152,15 @@ function App() {
 		}
 	}
 
+	const handleConfigChange = (newConfig: PvpTrackerConfig): void => {
+		setConfig(newConfig)
+		configService.updateConfig(newConfig)
+	}
+
+	const handleCalculationModeChange = (mode: CalculationMode): void => {
+		setCalculationMode(mode)
+	}
+
 	const getWinner = (fight: FightData): string | null => {
 		if (fight.competitor.dead && !fight.opponent.dead) {
 			return fight.opponent.name
@@ -135,13 +172,18 @@ function App() {
 
 	return (
 		<div className="app">
-			<header className="app-header">
-				<h1>PvP Performance Tracker</h1>
-				<p>Paste your fight data to view detailed metrics</p>
-			</header>
+			<Header />
 			<main className="app-main">
-				<div className="app-content">
+				<div className="config-section" style={{width: 280}}>
+					<ConfigurationPanel
+						config={config}
+						onConfigChange={handleConfigChange}
+						calculationMode={calculationMode}
+						onCalculationModeChange={handleCalculationModeChange}
+					/>
+				</div>
 
+				<div className="app-content">
 					<div className="input-section">
 						<FightDataInput
 							onSubmit={handleFightDataSubmit}
@@ -163,7 +205,7 @@ function App() {
 
 				<div className="history-section">
 					<FightHistory
-						fights={fightHistory}
+						fights={fightHistory.slice(0, 200)}
 						selectedFight={selectedFight}
 						onFightSelect={handleFightSelect}
 						onClearHistory={handleClearHistory}
