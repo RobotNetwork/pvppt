@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { PvpTrackerConfig, RobeHitFilter, RingData, BoltAmmo, StrongBoltAmmo, DartAmmo, CalculationMode } from '../../types'
+import { PvpTrackerConfig, RobeHitFilter, RingData, BoltAmmo, StrongBoltAmmo, CalculationMode } from '../../types'
 import type { ConfigurationPanelProps } from './ConfigurationPanel.types'
 import { configurationPanelStyles } from './ConfigurationPanel.styles'
 

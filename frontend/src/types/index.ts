@@ -1,5 +1,85 @@
-// PvP Performance Tracker - TypeScript Interfaces
-// Based on the Java plugin's data structures and the existing JavaScript implementation
+export type StyleTab = "MELEE" | "RANGED" | "MAGIC";
+export type Overhead = "NONE" | "MELEE" | "MISSILES" | "MAGIC";
+
+export type Equip =
+  | { kind: "item"; id: number }
+  | { kind: "kit"; id: number }
+  | { kind: "empty" };
+
+  // --- New calc-friendly tick ---
+export interface TickNorm {
+  time: number;                // r.t
+  tick: number;                // r.T
+  acted: boolean;              // r.f
+  expectedHits: number;        // r.expectedHits
+
+  action: string;              // r.m (e.g., "RANGED_CROSSBOW_PVP")
+  attackerStyle: StyleTab;     // r.O
+  defenderStyle: StyleTab;     // r.o
+
+  attackerGear: Equip[];       // decoded + carried-forward G
+  defenderGear: Equip[];       // decoded + carried-forward g
+
+  overhead: Overhead;          // mapped from r.p (defender's protect prayer)
+
+  attackerLevels?: {           // r.C (actor’s visible boosted levels on this tick)
+    atk: number; str: number; def: number; range: number; mage: number; hp: number;
+  };
+
+  hpEnemyBefore?: number;      // r.eH
+  hpSelfBefore?: number;       // r.oH
+
+  recorded?: {                 // recorded outputs (useful for “Recorded” mode / diff)
+    acc?: number;              // r.a
+    max?: number;              // r.h
+    exp?: number;              // r.d
+    dmg?: number;              // r.aD
+    ko?: number;               // r.k or r.displayKoChance
+  };
+}
+
+// Optional wrappers, if you want them:
+export interface SideNorm { name: string; ticks: TickNorm[]; }
+export interface FightNorm {
+  meta: { time?: number; world?: number; type?: string };
+  competitor: SideNorm;
+  opponent: SideNorm;
+}
+
+
+export interface TickRaw {
+  t:number;           // timestamp
+  T:number;           // tick index
+  f?:boolean;         // actor flag (this side acted)
+  G?:number[];        // attacker composition array (appearance ids)
+  g?:number[];        // defender composition array (appearance ids)
+  O?:StyleTab;        // attacker style tab
+  o?:StyleTab;        // defender style tab
+  m?:string;          // action key (e.g., RANGED_CROSSBOW_PVP)
+  d?:number; a?:number; h?:number; aD?:number; // recorded outputs
+  C?:CombatLevels; // actor levels (this side)
+  eH?:number; oH?:number; // expected hp before and after hit
+  p?:number;          // overhead id
+  expectedHits?:number;
+  displayHpBefore?:number; 
+  displayHpAfter?:number;
+  isPartOfTickGroup?:boolean;
+}
+
+
+
+export interface FighterRaw {
+  n:string; // player name
+  // summary fields (keep as-is)
+  a?:number; s?:number; d?:number; h?:number; // etc.
+  l: TickRaw[]; // timeline of ticks
+}
+
+export interface FightDataRaw {
+  t?:number; w?:number; l?:string;
+  c: FighterRaw;
+  o: FighterRaw;
+}
 
 export interface CombatLevels {
   atk: number;
@@ -13,24 +93,45 @@ export interface CombatLevels {
 export interface FightLogEntry {
   time: number;
   tick: number;
+
+  // @deprecated: this flag doesn’t mean “full entry”; use TickNorm.acted / expectedHits instead.
   isFullEntry: boolean;
+
+  // @deprecated: these should be typed Equip[] in new code; keep as-is for current UI.
   attackerGear: string[];
-  attackerOverhead: string | null;
-  animationData: string | null;
-  deservedDamage: number;
-  accuracy: number;
-  maxHit: number;
-  minHit: number;
-  splash: boolean;
-  attackerLevels: CombatLevels | null;
-  koChance: number | null;
-  estimatedHpBeforeHit: number | null;
-  opponentMaxHp: number | null;
-  matchedHitsCount: number;
-  actualDamageSum: number;
   defenderGear: string[];
-  defenderOverhead: string | null;
+
+  // @deprecated: overhead is on the DEFENDER (payload key `p`). Use TickNorm.overhead.
+  attackerOverhead: string | null;
+
+  // @deprecated: the payload doesn’t serialize animations; use TickNorm.action (payload `m`).
+  animationData: string | null;
+
+  // recorded outputs:
+  deservedDamage: number; // payload `d`
+  accuracy: number;       // payload `a`
+  maxHit: number;         // payload `h`
+
+  // @deprecated: payload `l` isn’t a “min hit”; don’t use/compute it.
+  minHit: number;
+
+  splash: boolean;
+
+  // actor levels (only present on actor’s ticks)
+  attackerLevels: CombatLevels | null;
+
+  // recorded KO chance if present
+  koChance: number | null;
+
+  // bookkeeping/visuals:
+  estimatedHpBeforeHit: number | null; // eH
+  opponentMaxHp: number | null;        // oH
+  matchedHitsCount: number;            // mC
+  actualDamageSum: number;             // aD
+
+  // @deprecated: not an “offensive pray”; payload `p` is defender overhead.
   attackerOffensivePray: number;
+
   expectedHits: number;
   isGmaulSpecial: boolean;
   displayHpBefore: number | null;
@@ -96,7 +197,7 @@ export interface KoChances {
 }
 
 export interface FightDataParserInterface {
-  parseFightData(jsonData: string | object): FightData;
+  parseFightDataSummary(jsonData: string | object): FightData;
   parseFighter(fighterData: any): Fighter;
   parseFightLogEntries(entries: any[]): FightLogEntry[];
   parseFightLogEntry(entry: any): FightLogEntry;

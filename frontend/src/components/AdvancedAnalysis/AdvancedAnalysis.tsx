@@ -164,7 +164,7 @@ export const SpikeGraph: React.FC<{ series: SpikeSeries; competitorName: string;
   )
 }
 
-const AdvancedAnalysis: React.FC<AdvancedAnalysisProps> = ({ fightData, showSpike = false, onShowSpikeChange }) => {
+const AdvancedAnalysis: React.FC<AdvancedAnalysisProps> = ({ showSpike = false, onShowSpikeChange }) => {
   const [expanded, setExpanded] = React.useState<boolean>(false)
 
   return (

@@ -97,7 +97,7 @@ function App() {
 		setError(null)
 
 		try {
-			const parsedData = parser.parseFightData(jsonData)
+			const parsedData = parser.parseFightDataSummary(jsonData)
 
 			// Recalculate metrics based on current calculation mode and config
 			let recalculatedData = parsedData
@@ -121,7 +121,7 @@ function App() {
 				data: recalculatedData,
 				competitorName: recalculatedData.competitor.name,
 				opponentName: recalculatedData.opponent.name,
-				hash: hashFightData(JSON.parse(jsonData)) // Add hash to the fight object
+				hash: hashFightData(JSON.parse(jsonData)) // to uniquely identify the fight, prevents duplicates
 			}
 
 			const duplicateFight = findDuplicateFight(JSON.parse(jsonData))

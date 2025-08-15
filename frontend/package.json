@@ -1,38 +1,52 @@
 {
-  "name": "pvptracker",
+  "name": "pvppt",
+  "version": "1.0.0",
+  "description": "PvP Performance Tracker - TypeScript rewrite with React frontend",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint .",
     "preview": "vite preview",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
-  },
-  "dependencies": {
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "clean": "rm -rf dist build node_modules"
   },
   "devDependencies": {
-    "@eslint/js": "^9.32.0",
-    "@testing-library/jest-dom": "^6.6.4",
-    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^29.5.12",
     "@types/node": "^24.2.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "@vitejs/plugin-react": "^4.7.0",
-    "@vitest/ui": "^3.2.4",
-    "eslint": "^9.32.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.3.0",
+    "concurrently": "^8.2.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^5.0.0",
     "jsdom": "^26.1.0",
-    "typescript": "^5.9.2",
-    "vite": "^7.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "vite": "^7.1.2",
     "vitest": "^3.2.4"
-  }
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "keywords": [
+    "pvp",
+    "runescape",
+    "osrs",
+    "performance",
+    "tracker",
+    "typescript",
+    "react"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
