@@ -1,18 +1,18 @@
 import {
-	FightData,
-	Fighter,
-	FightLogEntry,
 	CombatLevels,
-	KoChances,
-	FormattedMetrics,
-	FightDataParserInterface,
+	Fighter,
+	FightData,
 	FightDataRaw,
+	FightDataParserInterface,
+	FormattedMetrics,
+	KoChances,
+	Overhead,
+	TickNorm	
 } from '../types/index';
 
 export function parseFightData(json: string | object): FightDataRaw {
 	const data = typeof json === "string" ? JSON.parse(json) : json;
 	if (!data?.c?.l || !data?.o?.l) throw new Error("Invalid fight data");
-	// (Optionally coerce numeric fields/arrays; don’t transform values)
 	return data as FightDataRaw;
   }
 
@@ -66,44 +66,53 @@ export class FightDataParser implements FightDataParserInterface {
 			hpHealed: fighterData.H || 0,
 			robeHits: fighterData.rh || 0,
 			dead: fighterData.x || false,
-			fightLogEntries: this.parseFightLogEntries(fighterData.l || [])
+			ticks: this.parseTicks(fighterData.l || [])
 		};
 	}
 
-	parseFightLogEntries(entries: any[]): FightLogEntry[] {
-		return entries.map(entry => this.parseFightLogEntry(entry));
+	parseTicks(entries: any[]): TickNorm[] {
+		return entries.map(entry => this.parseTick(entry));
 	}
 
-	parseFightLogEntry(entry: any): FightLogEntry {
+	parseTick(entry: any): TickNorm {
 		return {
 			time: entry.t || 0,
 			tick: entry.T || 0,
-			isFullEntry: entry.f || false,
-			attackerGear: entry.G || [],
-			attackerOverhead: entry.O || null,
-			animationData: entry.m || null,
-			deservedDamage: entry.d || 0,
-			accuracy: entry.a || 0,
-			maxHit: entry.h || 0,
-			minHit: entry.l || 0,
-			splash: entry.s || false,
-			attackerLevels: this.parseCombatLevels(entry.C),
-			koChance: entry.k || null,
-			estimatedHpBeforeHit: entry.eH || null,
-			opponentMaxHp: entry.oH || null,
-			matchedHitsCount: entry.mC || 0,
-			actualDamageSum: entry.aD || 0,
-			
-			defenderGear: entry.g || [],
-			// defenderOverhead: entry.o || null,
-			attackerOffensivePray: entry.p || 0,
+			acted: entry.f || false,
 			expectedHits: entry.expectedHits || 1,
-			isGmaulSpecial: entry.GMS || false,
-			displayHpBefore: entry.displayHpBefore || null,
-			displayHpAfter: entry.displayHpAfter || null,
-			displayKoChance: entry.displayKoChance || null,
-			isPartOfTickGroup: entry.isPartOfTickGroup || false
+			action: entry.m || 'UNKNOWN',
+			attackerStyle: entry.O || 'MELEE',
+			defenderStyle: entry.o || 'MELEE',
+			attackerGear: entry.G || [],
+			defenderGear: entry.g || [],
+			overhead: entry.p ? this.mapOverhead(entry.p) : 'NONE',
+			attackerLevels: entry.C ? {
+				atk: entry.C.a || 0,
+				str: entry.C.s || 0,
+				def: entry.C.d || 0,
+				range: entry.C.r || 0,
+				mage: entry.C.m || 0,
+				hp: entry.C.h || 0
+			} : undefined,
+			hpEnemyBefore: entry.eH,
+			hpSelfBefore: entry.oH,
+			recorded: {
+				acc: entry.a,
+				max: entry.h,
+				exp: entry.d,
+				dmg: entry.aD,
+				ko: entry.k || entry.displayKoChance
+			}
 		};
+	}
+
+	private mapOverhead(prayerId: number): Overhead {
+		switch (prayerId) {
+			case 946: return 'MELEE';
+			case 1420: return 'MISSILES';
+			case 1421: return 'MAGIC';
+			default: return 'NONE';
+		}
 	}
 
 	parseCombatLevels(levelsData: any): CombatLevels | null {
@@ -141,7 +150,7 @@ export class FightDataParser implements FightDataParserInterface {
 			: '0.0';
 
 		// Calculate KO chances metrics
-		const koChances = this.calculateKoChances(fighter.fightLogEntries);
+		const koChances = this.calculateKoChances(fighter.ticks);
 
 		return {
 			offPrayStats: `${fighter.offPraySuccessCount}/${fighter.attackCount} (${offPrayPercentage}%)`,
@@ -156,18 +165,18 @@ export class FightDataParser implements FightDataParserInterface {
 		};
 	}
 
-	calculateKoChances(fightLogEntries: FightLogEntry[]): KoChances {
-		if (!fightLogEntries || fightLogEntries.length === 0) {
+	calculateKoChances(ticks: TickNorm[]): KoChances {
+		if (!ticks || ticks.length === 0) {
 			return { count: 0, overallProbability: 0 };
 		}
 
 		let koChanceCount = 0;
 		let survivalProbability = 1.0;
 
-		for (const entry of fightLogEntries) {
-			if (entry.koChance !== null && entry.koChance > 0) {
+		for (const tick of ticks) {
+			if (tick.recorded?.ko !== undefined && tick.recorded.ko > 0) {
 				koChanceCount++;
-				survivalProbability *= (1.0 - entry.koChance);
+				survivalProbability *= (1.0 - tick.recorded.ko);
 			}
 		}
 

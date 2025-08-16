@@ -8,7 +8,7 @@ import {
     CalculationMode,
     FightData,
     Fighter,
-    FightLogEntry,
+    TickNorm,
     CombatLevels
   } from '../types';
   
@@ -674,21 +674,20 @@ import {
           opponent: { ...fightData.opponent }
         };
   
-        // Recalculate competitor metrics
-        if (recalculatedFightData.competitor.fightLogEntries) {
-          recalculatedFightData.competitor.fightLogEntries = 
+        // Recalculate fight log entries for both competitor and opponent
+        if (recalculatedFightData.competitor.ticks) {
+          recalculatedFightData.competitor.ticks =
             await this.recalculateFightLogEntries(
-              recalculatedFightData.competitor.fightLogEntries,
+              recalculatedFightData.competitor.ticks,
               config,
               calculationMode
             );
         }
-  
-        // Recalculate opponent metrics
-        if (recalculatedFightData.opponent.fightLogEntries) {
-          recalculatedFightData.opponent.fightLogEntries = 
+
+        if (recalculatedFightData.opponent.ticks) {
+          recalculatedFightData.opponent.ticks =
             await this.recalculateFightLogEntries(
-              recalculatedFightData.opponent.fightLogEntries,
+              recalculatedFightData.opponent.ticks,
               config,
               calculationMode
             );
@@ -715,66 +714,76 @@ import {
     }
   
     private async recalculateFightLogEntries(
-      entries: FightLogEntry[],
+      entries: TickNorm[],
       config: PvpTrackerConfig,
       calculationMode: CalculationMode
-    ): Promise<FightLogEntry[]> {
+    ): Promise<TickNorm[]> {
       return entries.map(entry => {
         const recalculatedEntry = { ...entry };
-  
+
         // Recalculate deserved damage
-        if (entry.animationData) {
-          recalculatedEntry.deservedDamage = this.deservedDamageCalculator.calculateDeservedDamage(
+        if (entry.action && entry.action.includes('MAGIC')) {
+          const deservedDamage = this.deservedDamageCalculator.calculateDeservedDamage(
             entry,
             config,
             calculationMode
           );
+          recalculatedEntry.recorded = {
+            ...recalculatedEntry.recorded,
+            exp: deservedDamage
+          };
         }
-  
+
         // Recalculate KO chance
-        if (entry.estimatedHpBeforeHit !== null && entry.opponentMaxHp !== null) {
-          recalculatedEntry.koChance = this.koChanceCalculator.calculateKoChance(
+        if (entry.hpEnemyBefore !== undefined && entry.hpSelfBefore !== undefined) {
+          const koChance = this.koChanceCalculator.calculateKoChance(
             entry,
-            entry.estimatedHpBeforeHit,
+            entry.hpEnemyBefore,
             config,
             calculationMode
           );
+          recalculatedEntry.recorded = {
+            ...recalculatedEntry.recorded,
+            ko: koChance
+          };
         }
-  
+
         return recalculatedEntry;
       });
     }
-  
+
     private recalculateFighterMetrics(
       fighter: Fighter,
       config: PvpTrackerConfig,
       calculationMode: CalculationMode
     ): Fighter {
       const recalculatedFighter = { ...fighter };
-  
+
       // Recalculate total deserved damage
-      if (fighter.fightLogEntries) {
-        recalculatedFighter.deservedDamage = fighter.fightLogEntries.reduce(
-          (total, entry) => total + (entry.deservedDamage || 0),
+      if (fighter.ticks) {
+        recalculatedFighter.deservedDamage = fighter.ticks.reduce(
+          (total, tick) => total + (tick.recorded?.exp || 0),
           0
         );
       }
-  
+
       // Recalculate magic luck metrics
-      if (fighter.fightLogEntries) {
-        const magicEntries = fighter.fightLogEntries.filter(entry => 
-          entry.animationData && entry.animationData.includes('MAGIC')
+      if (fighter.ticks) {
+        const magicTicks = fighter.ticks.filter(tick => 
+          tick.action && tick.action.includes('MAGIC')
         );
         
-        recalculatedFighter.totalMagicAttackCount = magicEntries.length;
-        recalculatedFighter.magicHitCount = magicEntries.filter(entry => !entry.splash).length;
+        recalculatedFighter.totalMagicAttackCount = magicTicks.length;
+        recalculatedFighter.magicHitCount = magicTicks.filter(tick => 
+          tick.recorded?.dmg && tick.recorded.dmg > 0
+        ).length;
         
         // Calculate deserved magic hits based on magic level and gear
         recalculatedFighter.magicHitCountDeserved = Math.round(
-          magicEntries.length * this.calculateMagicAccuracy(config, calculationMode)
+          magicTicks.length * this.calculateMagicAccuracy(config, calculationMode)
         );
       }
-  
+
       return recalculatedFighter;
     }
   

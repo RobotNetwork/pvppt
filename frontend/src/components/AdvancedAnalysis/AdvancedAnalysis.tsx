@@ -19,8 +19,8 @@ type SpikeSeries = {
 export const computeSpikeSeries = (fightData: FightData | null): SpikeSeries | null => {
   if (!fightData) return null
 
-  const cEntries = fightData.competitor.fightLogEntries
-  const oEntries = fightData.opponent.fightLogEntries
+  const cEntries = fightData.competitor.ticks
+  const oEntries = fightData.opponent.ticks
 
   if ((!cEntries || cEntries.length === 0) && (!oEntries || oEntries.length === 0)) {
     return { ticks: [], competitor: [], opponent: [], competitorCumulative: [], opponentCumulative: [] }
@@ -37,12 +37,12 @@ export const computeSpikeSeries = (fightData: FightData | null): SpikeSeries | n
 
   for (const e of cEntries) {
     const prev = tickToCompDamage.get(e.tick) || 0
-    const dmg = e.actualDamageSum || 0
+    const dmg = e.recorded?.dmg || 0
     tickToCompDamage.set(e.tick, prev + dmg)
   }
   for (const e of oEntries) {
     const prev = tickToOppDamage.get(e.tick) || 0
-    const dmg = e.actualDamageSum || 0
+    const dmg = e.recorded?.dmg || 0
     tickToOppDamage.set(e.tick, prev + dmg)
   }
 

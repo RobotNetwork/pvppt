@@ -1,12 +1,17 @@
 export type StyleTab = "MELEE" | "RANGED" | "MAGIC";
 export type Overhead = "NONE" | "MELEE" | "MISSILES" | "MAGIC";
 
+export const OVERHEAD_MAP: Record<number, Overhead> = {
+  946: "MELEE", 
+  1420: "MISSILES", 
+  1421: "MAGIC"
+};
+
 export type Equip =
   | { kind: "item"; id: number }
   | { kind: "kit"; id: number }
   | { kind: "empty" };
 
-  // --- New calc-friendly tick ---
 export interface TickNorm {
   time: number;                // r.t
   tick: number;                // r.T
@@ -46,7 +51,6 @@ export interface FightNorm {
   opponent: SideNorm;
 }
 
-
 export interface TickRaw {
   t:number;           // timestamp
   T:number;           // tick index
@@ -65,8 +69,6 @@ export interface TickRaw {
   displayHpAfter?:number;
   isPartOfTickGroup?:boolean;
 }
-
-
 
 export interface FighterRaw {
   n:string; // player name
@@ -90,56 +92,6 @@ export interface CombatLevels {
   hp: number;
 }
 
-export interface FightLogEntry {
-  time: number;
-  tick: number;
-
-  // @deprecated: this flag doesn’t mean “full entry”; use TickNorm.acted / expectedHits instead.
-  isFullEntry: boolean;
-
-  // @deprecated: these should be typed Equip[] in new code; keep as-is for current UI.
-  attackerGear: string[];
-  defenderGear: string[];
-
-  // @deprecated: overhead is on the DEFENDER (payload key `p`). Use TickNorm.overhead.
-  attackerOverhead: string | null;
-
-  // @deprecated: the payload doesn’t serialize animations; use TickNorm.action (payload `m`).
-  animationData: string | null;
-
-  // recorded outputs:
-  deservedDamage: number; // payload `d`
-  accuracy: number;       // payload `a`
-  maxHit: number;         // payload `h`
-
-  // @deprecated: payload `l` isn’t a “min hit”; don’t use/compute it.
-  minHit: number;
-
-  splash: boolean;
-
-  // actor levels (only present on actor’s ticks)
-  attackerLevels: CombatLevels | null;
-
-  // recorded KO chance if present
-  koChance: number | null;
-
-  // bookkeeping/visuals:
-  estimatedHpBeforeHit: number | null; // eH
-  opponentMaxHp: number | null;        // oH
-  matchedHitsCount: number;            // mC
-  actualDamageSum: number;             // aD
-
-  // @deprecated: not an “offensive pray”; payload `p` is defender overhead.
-  attackerOffensivePray: number;
-
-  expectedHits: number;
-  isGmaulSpecial: boolean;
-  displayHpBefore: number | null;
-  displayHpAfter: number | null;
-  displayKoChance: number | null;
-  isPartOfTickGroup: boolean;
-}
-
 export interface Fighter {
   name: string;
   attackCount: number;
@@ -155,7 +107,7 @@ export interface Fighter {
   hpHealed: number;
   robeHits: number;
   dead: boolean;
-  fightLogEntries: FightLogEntry[];
+  ticks: TickNorm[];
 }
 
 export interface FightData {
@@ -199,11 +151,11 @@ export interface KoChances {
 export interface FightDataParserInterface {
   parseFightDataSummary(jsonData: string | object): FightData;
   parseFighter(fighterData: any): Fighter;
-  parseFightLogEntries(entries: any[]): FightLogEntry[];
-  parseFightLogEntry(entry: any): FightLogEntry;
+  parseTicks(entries: any[]): TickNorm[];
+  parseTick(entry: any): TickNorm;
   parseCombatLevels(levelsData: any): CombatLevels | null;
   calculateMetrics(fighter: Fighter): any;
-  calculateKoChances(fightLogEntries: FightLogEntry[]): KoChances;
+  calculateKoChances(ticks: TickNorm[]): KoChances;
   formatMetrics(fighter: Fighter, isCompetitor?: boolean, opponent?: Fighter | null): FormattedMetrics;
 }
 
